@@ -10,17 +10,20 @@ debug = DebugToolbarExtension(app)
 
 responses = []
 
+
 @app.get("/")
 def survey_start():
     """Page where user can start the survey"""
     return render_template("survey_start.html",
-                           title = survey.title,
-                           instructions = survey.instructions)
+                           title=survey.title,
+                           instructions=survey.instructions)
+
 
 @app.post("/begin")
 def begin_survey():
     """Begin survey"""
     return redirect("/question/0")
+
 
 @app.get("/question/<int:id>")
 def display_question(id):
@@ -28,9 +31,24 @@ def display_question(id):
     survey_question = survey.questions[id]
 
     return render_template("question.html",
-                           question = survey_question)
+                           question=survey_question)
 
 
+@app.post("/answer")
+def handle_answer():
+    """Appends answer value to reponses and redirects to next question or thank you"""
+    answer = request.form['answer']
+    responses.append(answer)
+
+    if len(responses) == len(survey.questions):
+        return redirect("/thank-you")
+    else:
+        return redirect(f"/question/{len(responses)}")
 
 
-# @app.post("/answer")
+@app.get("/thank-you")
+def thank_user():
+    """Grabs questions and reponses and renders survey completion page"""
+    results = zip(survey.questions, responses)
+
+    return render_template("completion.html", results=results)

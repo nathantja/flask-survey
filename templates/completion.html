@@ -2,6 +2,18 @@
 
 {% block content %}
 
-  <h1>Thanks for completing this survey!</h1>
+<h1>Thanks for completing this survey!</h1>
+
+<ul>
+
+  {% for (question, answer) in results %}
+
+  <li>
+    <b>{{question.prompt}}</b> {{answer}}
+  </li>
+
+  {% endfor %}
+
+</ul>
 
 {% endblock %}
