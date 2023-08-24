@@ -13,38 +13,45 @@ debug = DebugToolbarExtension(app)
 def survey_start():
     """Render survey start"""
 
-    session["responses"] = []
-
     return render_template("survey_start.html", survey=survey)
 
 
 @app.post("/begin")
 def begin_survey():
     """Begin survey"""
+
+    session["responses"] = []
+
     return redirect("/question/0")
 
-
-# make sure to start the survey before showing questions
 
 @app.get("/question/<int:id>")
 def display_question(id):
     """Display question"""
 
-    if (session["responses"] != [] ):
+    responses = session.get("responses")
+    is_completed = len(responses) == len(survey.questions)
+
+    if responses == None:
         return redirect("/")
 
-    else:
-        survey_question = survey.questions[id]
+    if is_completed:
+        flash("You've already completed this survey")
+        return redirect("/thank-you")
 
-        return render_template("question.html",
-                            question=survey_question)
+    if id > len(responses):
+        id = len(responses)
+        flash("Can't access invalid question")
+        return redirect(f"/question/{id}")
 
-#response length could be different, can skip questions
-#have logic to fill survey in order
+    survey_question = survey.questions[id]
+
+    return render_template("question.html", question=survey_question)
+
 
 @app.post("/answer")
 def handle_answer():
-    """Appends answer value to reponses and redirects to next question or thank you"""
+    """Submit answer and show next question or thank you page"""
     answer = request.form['answer']
 
     responses = session["responses"]
@@ -59,7 +66,8 @@ def handle_answer():
 
 @app.get("/thank-you")
 def thank_user():
-    """Grabs questions and reponses and renders survey completion page"""
-    results = zip(survey.questions, session["responses"])
+    """Render survey results"""
 
-    return render_template("completion.html", results=results)
+    return render_template("completion.html",
+                           questions=survey.questions,
+                           answers=session['responses'])

@@ -2,15 +2,18 @@
 
 {% block content %}
 
+{% for msg in get_flashed_messages() %}
+<p>{{ msg }}</p>
+{% endfor %}
+
 <h1>Thanks for completing this survey!</h1>
 
-<!-- look at loop.index0 (jinja)-->
 <ul>
 
-  {% for (question, answer) in results %}
+  {% for question in questions %}
 
   <li>
-    <b>{{question.prompt}}</b> {{answer}}
+    <b>{{question.prompt}}</b> {{answers[loop.index0]}}
   </li>
 
   {% endfor %}
