@@ -67,6 +67,15 @@ def handle_answer():
 @app.get("/thank-you")
 def thank_user():
     """Render survey results"""
+    responses = session.get("responses")
+
+    if responses == None:
+        return redirect("/")
+
+    is_completed = len(responses) == len(survey.questions)
+
+    if not is_completed:
+        return redirect(f"/question/{len(session['responses'])}")
 
     return render_template("completion.html",
                            questions=survey.questions,
